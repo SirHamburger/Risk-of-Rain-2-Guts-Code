@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "XGQtTxJ37Qney+iOgpNhkAGnxA1l5SyAnSLZUzihE1wFKXJLFJZvoM/vZ80S9Vx7Qwl7SR3z2BsyzSbvr5+NcA==",
+  "success": true,
+  "projectFilePath": "/home/sirhamburger/Git/ExampleSurvivor-master/ExampleSurvivor/ExampleSurvivor/ExampleSurvivor/ExampleSurvivor.csproj",
+  "expectedPackageFiles": [
+    "/home/sirhamburger/.nuget/packages/microsoft.netcore.platforms/1.1.0/microsoft.netcore.platforms.1.1.0.nupkg.sha512",
+    "/home/sirhamburger/.nuget/packages/netstandard.library/2.0.3/netstandard.library.2.0.3.nupkg.sha512"
+  ],
+  "logs": []
+}
