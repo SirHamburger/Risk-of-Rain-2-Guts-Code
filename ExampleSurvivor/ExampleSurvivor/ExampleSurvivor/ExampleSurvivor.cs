@@ -30,6 +30,8 @@ namespace ExampleSurvivor
         public GameObject characterDisplay; // the prefab used for character select
         public GameObject doppelganger; // umbra shit
 
+        public static ChildLocator childLocator;
+
         public static GameObject arrowProjectile; // prefab for our survivor's primary attack projectile
 
         private static readonly Color characterColor = new Color(0.55f, 0.55f, 0.55f); // color used for the survivor
@@ -191,6 +193,7 @@ namespace ExampleSurvivor
                         Debug.LogWarning("before get ChildLocator");
 
             ChildLocator childLocator = model.GetComponent<ChildLocator>();
+            ExampleSurvivor.childLocator= childLocator;
 
             // this component is used to handle all overlays and whatever on your character, without setting this up you won't get any cool effects like burning or freeze on the character
             // it goes on the model object of course
@@ -668,7 +671,8 @@ namespace EntityStates.ExampleSurvivorStates
         private bool hasFired;
         private Animator animator;
         private string muzzleString;
-
+        private OverlapAttack overlapAttack;
+        private HitBox hitBox;
         public override void OnEnter()
         {
             Debug.LogWarning("In PrimarySkill");
@@ -679,26 +683,34 @@ namespace EntityStates.ExampleSurvivorStates
             this.animator = base.GetModelAnimator();
             this.muzzleString = "Muzzle";
             HitBox hitbox=null;
-            Transform transform = ExampleSurvivor.ExampleSurvivor.characterPrefab.transform.Find("spine upper weapon_end");
+
+
+            var gameObject = GameObject.Find("spine upper weapon_end");
+            Transform transform = gameObject.transform;
+
+            //ChildLocator childLocator = ExampleSurvivor.ExampleSurvivor.childLocator;
+
+            //Transform transform = childLocator.FindChild("spine upper weapon_end");
+            //Transform transform = ExampleSurvivor.ExampleSurvivor.characterPrefab.transform.Find("Armature/Hips/Spine/Chest/arm right wrist weapon_end/spine upper weapon/spine upper weapon_end");
             if(transform == null)
             Debug.LogError("transform == null");
             CapsuleCollider collider = transform.GetComponent<CapsuleCollider>();
             if(collider==null)
             Debug.LogError("collider == null");
 
+
+
             try{
-            hitbox = ExampleSurvivor.ExampleSurvivor.characterPrefab.transform.Find("spine upper weapon_end").GetComponent<CapsuleCollider>().gameObject.AddComponent<HitBox>();
+            hitbox = transform.GetComponent<CapsuleCollider>().gameObject.AddComponent<HitBox>();
+            this.hitBox = hitbox;
             if(hitbox == null)
                 Debug.LogError("hitbox == null");
             }
             catch
             {Debug.LogError("error while adding Hitbox");}
             
-            try{
-            var overlapattack=base.InitMeleeOverlap(1000,tracerEffectPrefab,base.GetModelTransform(),hitbox.name);
-            }
-            catch
-            {Debug.LogError("error while overlapAttack");}
+            overlapAttack=base.InitMeleeOverlap(1000,tracerEffectPrefab,base.GetModelTransform(),hitbox.name);
+            overlapAttack.damageType=DamageType.BleedOnHit;
 
             base.PlayAnimation("Gesture, Override", "Slash", "FireArrow.playbackRate", this.duration);
         }
@@ -715,28 +727,13 @@ namespace EntityStates.ExampleSurvivorStates
 
 
             //overlap.Fire()
-            
-            if (!this.hasFired)
-            {
-                this.hasFired = true;
-
-                base.characterBody.AddSpreadBloom(0.75f);
-                Ray aimRay = base.GetAimRay();
-
-                EffectManager.SimpleMuzzleFlash(Commando.CommandoWeapon.FirePistol.effectPrefab, base.gameObject, this.muzzleString, false);
-
-                if (base.isAuthority)
-                {
-                    ProjectileManager.instance.FireProjectile(ExampleSurvivor.ExampleSurvivor.arrowProjectile, aimRay.origin, Util.QuaternionSafeLookRotation(aimRay.direction), base.gameObject, this.damageCoefficient * this.damageStat, 0f, Util.CheckRoll(this.critStat, base.characterBody.master), DamageColorIndex.Default, null, -1f);
-                }
-                
-            }
         }
 
         public override void FixedUpdate()
         {
             base.FixedUpdate();
-
+            base.FireMeleeOverlap(overlapAttack,this.animator,hitBox.name,0f,false);
+            //overlapAttack.Fire(null);
             if (base.fixedAge >= this.fireDuration)
             {
                 FireArrow();
