@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Reflection;
 using System.Collections.Generic;
 using BepInEx;
@@ -54,25 +54,26 @@ namespace ExampleSurvivor
             //@ArtifactOfDoom:Assets/Import/artifactofdoom_icon/ArtifactDoomEnabled.png
             return model;
         }
-
+        public static GameObject gutsModel;
         internal static void CreatePrefab()
         {
             Debug.LogWarning("In CreatePrefab");
             // first clone the commando prefab so we can turn that into our own survivor
-            characterPrefab = PrefabAPI.InstantiateClone(Resources.Load<GameObject>("Prefabs/CharacterBodies/CommandoBody"), "ExampleSurvivorBody", true, "/home/sirhamburger/Git/ExampleSurvivor-master/ExampleSurvivor/ExampleSurvivor/ExampleSurvivor/ExampleSurvivor.cs", "CreatePrefab", 151);
+            characterPrefab = PrefabAPI.InstantiateClone(Resources.Load<GameObject>("Prefabs/CharacterBodies/CommandoBody"), "ExampleSurvivorBody", true, "/home/sirhamburger/Git/Risk-of-Rain-2-Guts-Code/ExampleSurvivor/ExampleSurvivor/ExampleSurvivor/ExampleSurvivor/ExampleSurvivor.cs", "CreatePrefab", 151);
             if(characterPrefab ==null)
                 Debug.LogError("characterPrefab == null");
             characterPrefab.GetComponent<NetworkIdentity>().localPlayerAuthority = true;
 
             // create the model here, we're gonna replace commando's model with our own
             GameObject model = CreateModel(characterPrefab);
+            gutsModel = model;
                         Debug.LogWarning("before get ModelBase");
 
             GameObject gameObject = new GameObject("ModelBase");
             gameObject.transform.parent = characterPrefab.transform;
             gameObject.transform.localPosition = new Vector3(0f, -0.81f, 0f);
             gameObject.transform.localRotation = Quaternion.identity;
-            gameObject.transform.localScale = new Vector3(1f, 1f, 1f);
+            gameObject.transform.localScale = new Vector3(1.3f, 1.3f, 1.3f);
                         Debug.LogWarning("before get CameraPivot");
 
             GameObject gameObject2 = new GameObject("CameraPivot");
@@ -367,11 +368,11 @@ namespace ExampleSurvivor
         {
             Debug.LogWarning("In Register Character");
             // now that the body prefab's set up, clone it here to make the display prefab
-            characterDisplay = PrefabAPI.InstantiateClone(characterPrefab.GetComponent<ModelLocator>().modelBaseTransform.gameObject, "ExampleSurvivorDisplay", true, "/home/sirhamburger/Git/ExampleSurvivor-master/ExampleSurvivor/ExampleSurvivor/ExampleSurvivor/ExampleSurvivor.cs", "RegisterCharacter", 153);
+            characterDisplay = PrefabAPI.InstantiateClone(characterPrefab.GetComponent<ModelLocator>().modelBaseTransform.gameObject, "ExampleSurvivorDisplay", true, "/home/sirhamburger/Git/Risk-of-Rain-2-Guts-Code/ExampleSurvivor/ExampleSurvivor/ExampleSurvivor/ExampleSurvivor/ExampleSurvivor.cs", "RegisterCharacter", 153);
             characterDisplay.AddComponent<NetworkIdentity>();
 
             // clone rex's syringe projectile prefab here to use as our own projectile
-            arrowProjectile = PrefabAPI.InstantiateClone(Resources.Load<GameObject>("Prefabs/Projectiles/SyringeProjectile"), "Prefabs/Projectiles/ExampleArrowProjectile", true, "/home/sirhamburger/Git/ExampleSurvivor-master/ExampleSurvivor/ExampleSurvivor/ExampleSurvivor/ExampleSurvivor.cs", "RegisterCharacter", 155);
+            arrowProjectile = PrefabAPI.InstantiateClone(Resources.Load<GameObject>("Prefabs/Projectiles/SyringeProjectile"), "Prefabs/Projectiles/ExampleArrowProjectile", true, "/home/sirhamburger/Git/Risk-of-Rain-2-Guts-Code/ExampleSurvivor/ExampleSurvivor/ExampleSurvivor/ExampleSurvivor/ExampleSurvivor.cs", "RegisterCharacter", 155);
 
             // just setting the numbers to 1 as the entitystate will take care of those
             arrowProjectile.GetComponent<ProjectileController>().procCoefficient = 1f;
@@ -434,14 +435,15 @@ namespace ExampleSurvivor
 
             PassiveSetup();
             PrimarySetup();
+            secondarySetup();
+            
         }
 
         void RegisterStates()
         {
-            Debug.LogWarning("In RegisterStates");
             // register the entitystates for networking reasons
             LoadoutAPI.AddSkill(typeof(ExampleSurvivorFireArrow));
-            Debug.LogWarning("finished RegisterStates");
+            LoadoutAPI.AddSkill(typeof(GutsSwordAttack));
         }
 
         void PassiveSetup()
@@ -462,7 +464,6 @@ namespace ExampleSurvivor
 
         void PrimarySetup()
         {
-            Debug.LogWarning("In PrimarySetup");
             SkillLocator component = characterPrefab.GetComponent<SkillLocator>();
 
             LanguageAPI.Add("EXAMPLESURVIVOR_PRIMARY_CROSSBOW_NAME", "Crossbow");
@@ -495,6 +496,8 @@ namespace ExampleSurvivor
             LoadoutAPI.AddSkillDef(mySkillDef);
 
             component.primary = characterPrefab.AddComponent<GenericSkill>();
+            
+
             SkillFamily newFamily = ScriptableObject.CreateInstance<SkillFamily>();
             newFamily.variants = new SkillFamily.Variant[1];
             LoadoutAPI.AddSkillFamily(newFamily);
@@ -508,6 +511,10 @@ namespace ExampleSurvivor
                 viewableNode = new ViewablesCatalog.Node(mySkillDef.skillNameToken, false, null)
             };
 
+            
+
+
+
 
             // add this code after defining a new skilldef if you're adding an alternate skill
 
@@ -520,14 +527,60 @@ namespace ExampleSurvivor
             };*/
             Debug.LogWarning("finished PrimarySetup");
         }
+        private void secondarySetup()
+        {
+            SkillLocator component = characterPrefab.GetComponent<SkillLocator>();
 
+            LanguageAPI.Add("EXAMPLESURVIVOR_PRIMARY_CROSSBOW_NAME", "Crossbow");
+            LanguageAPI.Add("EXAMPLESURVIVOR_PRIMARY_CROSSBOW_DESCRIPTION", "Fire an arrow, dealing <style=cIsDamage>200% damage</style>.");
+            var skillGutsSwordAttack = ScriptableObject.CreateInstance<SkillDef>();
+            skillGutsSwordAttack.activationState = new SerializableEntityStateType(typeof(GutsSwordAttack));
+            skillGutsSwordAttack.activationStateMachineName = "Weapon";
+            skillGutsSwordAttack.baseMaxStock = 1;
+            skillGutsSwordAttack.baseRechargeInterval = 0f;
+            skillGutsSwordAttack.beginSkillCooldownOnSkillEnd = false;
+            skillGutsSwordAttack.canceledFromSprinting = false;
+            skillGutsSwordAttack.fullRestockOnAssign = true;
+            skillGutsSwordAttack.interruptPriority = InterruptPriority.Any;
+            skillGutsSwordAttack.isBullets = false;
+            skillGutsSwordAttack.isCombatSkill = true;
+            skillGutsSwordAttack.mustKeyPress = false;
+            skillGutsSwordAttack.noSprint = true;
+            skillGutsSwordAttack.rechargeStock = 1;
+            skillGutsSwordAttack.requiredStock = 1;
+            skillGutsSwordAttack.shootDelay = 0f;
+            skillGutsSwordAttack.stockToConsume = 1;
+            skillGutsSwordAttack.icon = Assets.icon1;
+            //skillGutsSwordAttack.skillDescriptionToken = "EXAMPLESURVIVOR_PRIMARY_CROSSBOW_DESCRIPTION";
+            //skillGutsSwordAttack.skillName = "EXAMPLESURVIVOR_PRIMARY_CROSSBOW_NAME";
+            //skillGutsSwordAttack.skillNameToken = "EXAMPLESURVIVOR_PRIMARY_CROSSBOW_NAME";
+
+            LoadoutAPI.AddSkillDef(skillGutsSwordAttack);
+            component.secondary = characterPrefab.AddComponent<GenericSkill>();
+             SkillFamily newFamily = ScriptableObject.CreateInstance<SkillFamily>();
+            newFamily.variants = new SkillFamily.Variant[1];
+            LoadoutAPI.AddSkillFamily(newFamily);
+            component.secondary.SetFieldValue("_skillFamily", newFamily);
+            SkillFamily skillFamily = component.secondary.skillFamily;
+            component.secondary.SetFieldValue("_skillFamily", newFamily);
+
+
+            skillFamily = component.secondary.skillFamily;
+
+            skillFamily.variants[0] = new SkillFamily.Variant
+            {
+                skillDef = skillGutsSwordAttack,
+                unlockableName = "",
+                viewableNode = new ViewablesCatalog.Node(skillGutsSwordAttack.skillNameToken, false, null)
+            };
+        }
         private void CreateDoppelganger()
         {
             Debug.LogWarning("In CreateDoppelganger");
             // set up the doppelganger for artifact of vengeance here
             // quite simple, gets a bit more complex if you're adding your own ai, but commando ai will do
 
-            doppelganger = PrefabAPI.InstantiateClone(Resources.Load<GameObject>("Prefabs/CharacterMasters/CommandoMonsterMaster"), "ExampleSurvivorMonsterMaster", true, "/home/sirhamburger/Git/ExampleSurvivor-master/ExampleSurvivor/ExampleSurvivor/ExampleSurvivor/ExampleSurvivor.cs", "CreateDoppelganger", 159);
+            doppelganger = PrefabAPI.InstantiateClone(Resources.Load<GameObject>("Prefabs/CharacterMasters/CommandoMonsterMaster"), "ExampleSurvivorMonsterMaster", true, "/home/sirhamburger/Git/Risk-of-Rain-2-Guts-Code/ExampleSurvivor/ExampleSurvivor/ExampleSurvivor/ExampleSurvivor/ExampleSurvivor.cs", "CreateDoppelganger", 159);
 
             MasterCatalog.getAdditionalEntries += delegate (List<GameObject> list)
             {
@@ -618,7 +671,108 @@ namespace EntityStates.ExampleSurvivorStates
 
         public override void OnEnter()
         {
-            Debug.LogWarning("In OnEnter");
+            Debug.LogWarning("In PrimarySkill");
+            base.OnEnter();
+            this.duration = this.baseDuration / this.attackSpeedStat;
+            this.fireDuration = 0.25f * this.duration;
+            base.characterBody.SetAimTimer(2f);
+            this.animator = base.GetModelAnimator();
+            this.muzzleString = "Muzzle";
+            HitBox hitbox=null;
+            Transform transform = ExampleSurvivor.ExampleSurvivor.characterPrefab.transform.Find("spine upper weapon_end");
+            if(transform == null)
+            Debug.LogError("transform == null");
+            CapsuleCollider collider = transform.GetComponent<CapsuleCollider>();
+            if(collider==null)
+            Debug.LogError("collider == null");
+
+            try{
+            hitbox = ExampleSurvivor.ExampleSurvivor.characterPrefab.transform.Find("spine upper weapon_end").GetComponent<CapsuleCollider>().gameObject.AddComponent<HitBox>();
+            if(hitbox == null)
+                Debug.LogError("hitbox == null");
+            }
+            catch
+            {Debug.LogError("error while adding Hitbox");}
+            
+            try{
+            var overlapattack=base.InitMeleeOverlap(1000,tracerEffectPrefab,base.GetModelTransform(),hitbox.name);
+            }
+            catch
+            {Debug.LogError("error while overlapAttack");}
+
+            base.PlayAnimation("Gesture, Override", "Slash", "FireArrow.playbackRate", this.duration);
+        }
+
+        public override void OnExit()
+        {
+            base.OnExit();
+        }
+
+        private void FireArrow()
+        {
+            //BasicMeleeAttack basicMeleeAttack = new BasicMeleeAttack();
+            //OverlapAttack overlap= new OverlapAttack();
+
+
+            //overlap.Fire()
+            
+            if (!this.hasFired)
+            {
+                this.hasFired = true;
+
+                base.characterBody.AddSpreadBloom(0.75f);
+                Ray aimRay = base.GetAimRay();
+
+                EffectManager.SimpleMuzzleFlash(Commando.CommandoWeapon.FirePistol.effectPrefab, base.gameObject, this.muzzleString, false);
+
+                if (base.isAuthority)
+                {
+                    ProjectileManager.instance.FireProjectile(ExampleSurvivor.ExampleSurvivor.arrowProjectile, aimRay.origin, Util.QuaternionSafeLookRotation(aimRay.direction), base.gameObject, this.damageCoefficient * this.damageStat, 0f, Util.CheckRoll(this.critStat, base.characterBody.master), DamageColorIndex.Default, null, -1f);
+                }
+                
+            }
+        }
+
+        public override void FixedUpdate()
+        {
+            base.FixedUpdate();
+
+            if (base.fixedAge >= this.fireDuration)
+            {
+                FireArrow();
+            }
+
+            if (base.fixedAge >= this.duration && base.isAuthority)
+            {
+                this.outer.SetNextStateToMain();
+            }
+        }
+
+        public override InterruptPriority GetMinimumInterruptPriority()
+        {
+            return InterruptPriority.Skill;
+        }
+    }
+}
+
+namespace EntityStates.ExampleSurvivorStates
+{
+    public class GutsSwordAttack : BaseSkillState
+    {
+        public float damageCoefficient = 2f;
+        public float baseDuration = 3.75f;
+        public float recoil = 1f;
+        //public static GameObject tracerEffectPrefab = Resources.Load<GameObject>("Prefabs/Effects/Tracers/TracerToolbotRebar");
+
+        private float duration;
+        private float fireDuration;
+        private bool hasFired;
+        private Animator animator;
+        private string muzzleString;
+
+        public override void OnEnter()
+        {
+            Debug.LogWarning("In SecondaySkill");
             base.OnEnter();
             this.duration = this.baseDuration / this.attackSpeedStat;
             this.fireDuration = 0.25f * this.duration;
@@ -627,8 +781,9 @@ namespace EntityStates.ExampleSurvivorStates
             this.muzzleString = "Muzzle";
 
 
-            base.PlayAnimation("Gesture, Override", "FireArrow", "FireArrow.playbackRate", this.duration);
-            Debug.LogWarning("finished OnEnter");
+            base.PlayAnimation("Gesture, Override", "GutsSwordAttack", "GutsSwordAttack.playbackRate", 3.7f);
+                        Debug.LogWarning("Playing animation");
+
         }
 
         public override void OnExit()

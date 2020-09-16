@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/home/sirhamburger/Git/ExampleSurvivor-master/ExampleSurvivor/ExampleSurvivor/ExampleSurvivor/ExampleSurvivor.csproj": {}
+    "/home/sirhamburger/Git/Risk-of-Rain-2-Guts-Code/ExampleSurvivor/ExampleSurvivor/ExampleSurvivor/ExampleSurvivor.csproj": {}
   },
   "projects": {
-    "/home/sirhamburger/Git/ExampleSurvivor-master/ExampleSurvivor/ExampleSurvivor/ExampleSurvivor/ExampleSurvivor.csproj": {
+    "/home/sirhamburger/Git/Risk-of-Rain-2-Guts-Code/ExampleSurvivor/ExampleSurvivor/ExampleSurvivor/ExampleSurvivor.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/sirhamburger/Git/ExampleSurvivor-master/ExampleSurvivor/ExampleSurvivor/ExampleSurvivor/ExampleSurvivor.csproj",
+        "projectUniqueName": "/home/sirhamburger/Git/Risk-of-Rain-2-Guts-Code/ExampleSurvivor/ExampleSurvivor/ExampleSurvivor/ExampleSurvivor.csproj",
         "projectName": "ExampleSurvivor",
-        "projectPath": "/home/sirhamburger/Git/ExampleSurvivor-master/ExampleSurvivor/ExampleSurvivor/ExampleSurvivor/ExampleSurvivor.csproj",
+        "projectPath": "/home/sirhamburger/Git/Risk-of-Rain-2-Guts-Code/ExampleSurvivor/ExampleSurvivor/ExampleSurvivor/ExampleSurvivor.csproj",
         "packagesPath": "/home/sirhamburger/.nuget/packages/",
-        "outputPath": "/home/sirhamburger/Git/ExampleSurvivor-master/ExampleSurvivor/ExampleSurvivor/ExampleSurvivor/obj/",
+        "outputPath": "/home/sirhamburger/Git/Risk-of-Rain-2-Guts-Code/ExampleSurvivor/ExampleSurvivor/ExampleSurvivor/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/home/sirhamburger/.nuget/NuGet/NuGet.Config"
